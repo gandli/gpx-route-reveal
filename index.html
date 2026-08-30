@@ -4,10 +4,31 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Turn a GPX track into a 3D satellite route-reveal animation. 100% in-browser, no upload." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗺️</text></svg>" />
   <title>GPX Route Reveal</title>
 </head>
 <body>
-  <div id="map"></div>
+  <div id="app">
+    <div id="map"></div>
+    <div id="panel">
+      <h1>GPX Route Reveal</h1>
+      <p class="sub">Drop a GPX track → 3D satellite route-reveal animation. Processed entirely in your browser.</p>
+      <div id="drop">Drop .gpx here</div>
+      <input id="file" type="file" accept=".gpx" hidden />
+      <div id="meta" hidden></div>
+      <div id="controls" hidden>
+        <div class="row">
+          <button id="play">Play</button>
+          <button id="export" title="Record animation to WebM">Export MP4</button>
+        </div>
+        <input id="speed" type="range" min="0.2" max="4" step="0.2" value="1" />
+        <label for="speed">speed ×<span id="speedval">1</span></label>
+        <input id="progress" type="range" min="0" max="1000" value="0" />
+        <label for="progress">progress</label>
+      </div>
+      <p class="hint">Data: © Esri World Imagery · terrain © MapTiler/OpenTopography · no key required.</p>
+    </div>
+  </div>
   <script type="module" src="/src/main.ts"></script>
 </body>
 </html>
