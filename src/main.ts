@@ -24,11 +24,20 @@ const map = new maplibregl.Map({
         tileSize: 256,
         maxzoom: 15,
       },
+      terrainShade: {
+        type: "raster-dem",
+        tiles: ["https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png"],
+        encoding: "terrarium",
+        tileSize: 256,
+        maxzoom: 15,
+      },
     },
     layers: [
       { id: "satellite", type: "raster", source: "satellite" },
-      { id: "terrain", type: "hillshade", source: "terrain", paint: { "hillshade-exaggeration": 0.6 } },
+      { id: "terrain", type: "hillshade", source: "terrainShade", paint: { "hillshade-exaggeration": 1 } },
     ],
+    // real 3D terrain mesh — without this the map is flat; pitch is only an angle
+    terrain: { source: "terrain", exaggeration: 1.5 },
   },
   center: [119.305, 26.082],
   zoom: 12,
@@ -81,6 +90,9 @@ function loadTrack(file: File) {
         };
         playBtn.textContent = "Play";
         progress.value = "0";
+        // auto-play so the camera follows the route immediately (demo UX)
+        reveal.setPlaying(true);
+        playBtn.textContent = "Pause";
       };
       if (map.isStyleLoaded()) build();
       else map.once("style.load", build);
