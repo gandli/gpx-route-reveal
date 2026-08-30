@@ -5,7 +5,6 @@ along the terrain while the camera follows. 100% in-browser, nothing uploaded.
 
 ![stack](https://img.shields.io/badge/MapLibre%20GL-4.x-396CB2)
 ![ts](https://img.shields.io/badge/TypeScript-strict-3178C6)
-![build](https://img.shields.io/github/actions/workflow/status/gandli/gpx-route-reveal/ci.yml?branch=main)
 
 Modern rewrite of the old [3DHikeMap](https://github.com/fredderks/3DHikeMap)
 (R + Leaflet) on a plain web stack — no build-time server, no 3D engine.
