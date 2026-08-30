@@ -24,7 +24,7 @@ Modern rewrite of the old [3DHikeMap](https://github.com/fredderks/3DHikeMap)
 ```bash
 npm install
 npm run dev
-# open http://localhost:5173, drop samples/demo.gpx
+# open http://localhost:5173 — the 磨溪登山道 demo track auto-loads; drop any .gpx to replace it
 ```
 
 ## Stack
