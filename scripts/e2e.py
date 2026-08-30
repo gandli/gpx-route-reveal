@@ -29,7 +29,7 @@ try:
         page.wait_for_selector("#map canvas", timeout=20000)
         page.wait_for_function("window.__map !== undefined", timeout=15000)
 
-        page.set_input_files("#file", str(root / "samples" / "demo.gpx"))
+        page.set_input_files("#file", str(root / "public" / "demo.gpx"))
         page.wait_for_selector("#meta:not([hidden])", timeout=10000)
 
         page.click("#play")

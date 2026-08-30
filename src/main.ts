@@ -136,3 +136,10 @@ exportBtn.addEventListener("click", async () => {
     exportBtn.textContent = "Export MP4";
   }
 });
+
+// auto-load the demo track so the map shows a route without dragging
+// (mobile browsers can't drag files) — loadTrack handles style-load timing
+fetch("demo.gpx")
+  .then((r) => r.blob())
+  .then((b) => loadTrack(new File([b], "demo.gpx", { type: "application/gpx+xml" })))
+  .catch(() => setDrop("Drop a .gpx file"));
