@@ -19,6 +19,7 @@
       <div id="controls" hidden>
         <div class="row">
           <button id="play">Play</button>
+          <button id="pick" title="Click start, then end, on the map">Pick route</button>
           <button id="export" title="Record animation to WebM">Export MP4</button>
         </div>
         <input id="speed" type="range" min="0.2" max="4" step="0.2" value="1" />
@@ -26,7 +27,7 @@
         <input id="progress" type="range" min="0" max="1000" value="0" />
         <label for="progress">progress</label>
       </div>
-      <p class="hint">Data: © Esri World Imagery · terrain © MapTiler/OpenTopography · no key required.</p>
+      <p class="hint">Data: © Esri World Imagery · terrain © MapTiler/OpenTopography · routing © BRouter/OpenStreetMap · no key required.</p>
     </div>
   </div>
   <script type="module" src="/src/main.ts"></script>

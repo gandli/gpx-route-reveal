@@ -1,9 +1,10 @@
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "./style.css";
-import { parseGpx } from "./gpx";
+import { parseGpx, type Track } from "./gpx";
 import { RouteReveal } from "./animate";
 import { recordWebm } from "./recorder";
+import { RoutePicker } from "./route";
 
 const map = new maplibregl.Map({
   container: "map",
@@ -89,6 +90,7 @@ const exportBtn = document.getElementById("export") as HTMLButtonElement;
 const speedInput = document.getElementById("speed") as HTMLInputElement;
 const speedVal = document.getElementById("speedval")!;
 const progress = document.getElementById("progress") as HTMLInputElement;
+const pickBtn = document.getElementById("pick") as HTMLButtonElement;
 
 let reveal: RouteReveal | null = null;
 
@@ -96,41 +98,64 @@ function setDrop(msg: string) {
   drop.textContent = msg;
 }
 
+// shared path: loadTrack(file) and the map picker both land here
+function loadTrackFromData(track: Track) {
+  setDrop(`${track.name} — ${track.points.length} pts, ${track.distanceKm.toFixed(1)} km`);
+  meta.hidden = false;
+  meta.textContent =
+    `elev ${track.minEle ?? "?"}–${track.maxEle ?? "?"} m · ${track.points.length} pts · ` +
+    `${track.distanceKm.toFixed(1)} km`;
+  controls.hidden = false;
+  // sources must be added after the style has loaded — the map canvas
+  // appears before 'load', so defer if needed.
+  const build = () => {
+    // destroy inside build: two queued builds (auto-load + drop race) can't
+    // both addSource the same IDs — delay destroy until we actually rebuild.
+    if (reveal) reveal.destroy();
+    reveal = new RouteReveal(map, track);
+    reveal.onProgress = (t) => {
+      progress.value = String(Math.round(t * 1000));
+    };
+    playBtn.textContent = "Play";
+    progress.value = "0";
+    // auto-play so the camera follows the route immediately (demo UX)
+    reveal.setPlaying(true);
+    playBtn.textContent = "Pause";
+  };
+  // isStyleLoaded() stays false while tiles stream and 'style.load' never
+  // re-fires on an already-parsed style. Gate on the style's base layers
+  // existing (public API — same timing as style.load) and poll until then.
+  const styleReady = () => !!map.getLayer("satellite");
+  if (styleReady()) build();
+  else {
+    const timer = window.setInterval(() => {
+      if (!styleReady()) return;
+      window.clearInterval(timer);
+      build();
+    }, 200);
+    window.setTimeout(() => window.clearInterval(timer), 30000); // no leak
+  }
+}
+
 function loadTrack(file: File) {
   const reader = new FileReader();
   reader.onload = () => {
     try {
       const track = parseGpx(String(reader.result));
-      setDrop(`${track.name} — ${track.points.length} pts, ${track.distanceKm.toFixed(1)} km`);
-      meta.hidden = false;
-      meta.textContent =
-        `elev ${track.minEle ?? "?"}–${track.maxEle ?? "?"} m · ${track.points.length} pts · ` +
-        `${track.distanceKm.toFixed(1)} km`;
-      controls.hidden = false;
-      if (reveal) reveal.destroy();
-      // sources must be added after the style has loaded — the map canvas
-      // appears before 'load', so defer if needed.
-      // Use style.load (fires after JSON parse, before tiles) not map.loaded
-      // (which waits for all visible tiles — hangs in headless).
-      const build = () => {
-        reveal = new RouteReveal(map, track);
-        reveal.onProgress = (t) => {
-          progress.value = String(Math.round(t * 1000));
-        };
-        playBtn.textContent = "Play";
-        progress.value = "0";
-        // auto-play so the camera follows the route immediately (demo UX)
-        reveal.setPlaying(true);
-        playBtn.textContent = "Pause";
-      };
-      if (map.isStyleLoaded()) build();
-      else map.once("style.load", build);
+      loadTrackFromData(track);
     } catch (e) {
       setDrop(`Error: ${(e as Error).message}`);
     }
   };
   reader.readAsText(file);
 }
+
+// pick start/end on the map → BRouter walking route → same pipeline as GPX drop
+const picker = new RoutePicker(map, setDrop, loadTrackFromData);
+pickBtn.addEventListener("click", () => {
+  if (picker.active) picker.reset();
+  else picker.begin();
+});
 
 drop.addEventListener("click", () => fileInput.click());
 drop.addEventListener("dragover", (e) => e.preventDefault());
