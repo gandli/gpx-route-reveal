@@ -1,65 +1,87 @@
-# GPX Route Reveal
+# 🗺️ GPX Route Reveal
 
-Turn a GPX track into a **3D satellite route-reveal animation** — route grows
-along the terrain while the camera follows. 100% in-browser, nothing uploaded.
+> 拖入 GPX 轨迹 → 3D 卫星地图上路线沿地形生长 + 相机跟随 → 一键导出 WebM 动画。
+> 100% 浏览器内处理，**不上传任何数据**。
 
 ![stack](https://img.shields.io/badge/MapLibre%20GL-4.x-396CB2)
 ![ts](https://img.shields.io/badge/TypeScript-strict-3178C6)
+![vite](https://img.shields.io/badge/Vite-5-646CFF)
 ![build](https://img.shields.io/github/actions/workflow/status/gandli/gpx-route-reveal/ci.yml?branch=main)
 
-Modern rewrite of the old [3DHikeMap](https://github.com/fredderks/3DHikeMap)
-(R + Leaflet) on a plain web stack — no build-time server, no 3D engine.
+3D 卫星地图路线生长动画工具 —— 现代重写旧
+[3DHikeMap](https://github.com/fredderks/3DHikeMap)（R + Leaflet，2019 年停更）。
+Vite + TypeScript + MapLibre GL 纯前端实现，无构建期服务器、无重量级 3D 引擎。
 
-## Features
+---
 
-- Drag-and-drop GPX → route-reveal animation
-- 3D terrain from free terrarium DEM + Esri World Imagery (no API key)
-- Route **grows** along the track (truncated `LineString`, no per-frame gradients)
-- Camera follows the track: pitch/bearing auto-orient, pull-in + pull-out
-- Play / pause / speed / scrub
-- **Export WebM** via native `MediaRecorder` + `canvas.captureStream` (no WebCodecs, no muxer)
+## 效果预览
 
-## Demo
+**磨溪登山道**（福州鼓山，5.3 km，329–657 m 海拔）—— 真实 OSM 路网轨迹：
+
+| 路线生长 | 3D 地形 | 3D 建筑 |
+|---|---|---|
+| ![route-reveal](assets/readme/route-reveal.jpg) | ![3d-terrain](assets/readme/3d-terrain.jpg) | ![3d-buildings](assets/readme/3d-buildings-city.jpg) |
+
+*左：路线沿卫星图生长，相机跟随头部。中：terrarium DEM 渲染的 3D 山体起伏。
+右：OSM 矢量 tile 按真实高度挤出的 3D 建筑（矮楼浅灰 → 高楼暖棕）。*
+
+---
+
+## 核心特性
+
+- **拖放即用** —— 打开页面自动加载磨溪登山道 demo，手机也能看（无需拖文件）
+- **路线生长** —— 截断 `LineString` 沿累积距离驱动，绿色路线从起点沿地形生长
+- **相机平滑跟随** —— 低通滤波全部相机参数，镜头沿轨迹缓动转向，无抖动
+- **真实 3D 地形** —— AWS terrarium DEM 高程网格，2.5× 夸张增强立体感
+- **3D 建筑** —— OpenFreeMap OSM 矢量 tile `fill-extrusion`，按 `render_height` 分色
+- **本地导出 WebM** —— `canvas.captureStream` + `MediaRecorder`，零依赖零上传
+
+## 技术栈
+
+| 组件 | 实现 |
+|---|---|
+| 构建 | Vite 5 + TypeScript strict |
+| 地图 / 3D | MapLibre GL 4（raster DEM + terrain + fill-extrusion） |
+| 路线动画 | 截断 GeoJSON `LineString` + 累积距离采样 |
+| 相机 | `jumpTo` + 低通滤波插值 |
+| 导出 | `MediaRecorder` over canvas stream → WebM |
+
+刻意不引入 Three.js / Turf.js / WebCodecs —— MapLibre 已覆盖地形，
+路线动画只需几行几何，MediaRecorder 是原生导出路径。
+`ponytail:` 若以后要真 MP4/H.264，把 `recorder.ts` 换成
+WebCodecs `VideoEncoder` + `mp4-muxer`，canvas 采集管线不变。
+
+## 快速开始
 
 ```bash
 npm install
 npm run dev
-# open http://localhost:5173 — the 磨溪登山道 demo track auto-loads; drop any .gpx to replace it
+# 打开 http://localhost:5173 —— 磨溪登山道 demo 自动加载，拖入任意 .gpx 替换
 ```
 
-## Stack
+## 使用
 
-| Piece | Choice |
-|---|---|
-| Build | Vite 5 + TypeScript strict |
-| Map / 3D | MapLibre GL 4 (raster DEM + hillshade = 3D terrain) |
-| Route reveal | truncated GeoJSON `LineString` driven by cumulative-distance sampling |
-| Camera | `jumpTo` interpolation along the track (FreeCamera-style) |
-| Export | MediaRecorder over canvas stream → WebM |
+1. 打开应用（或局域网访问 `http://<你的IP>:5173`）
+2. 拖入 `.gpx` 轨迹文件（track 段）
+3. **Play** → 相机飞入、路线沿地形生长、相机跟随路线头
+4. **Export MP4** → 录制当前动画为 `.webm`（保持标签页可见）
 
-Deliberately no Three.js / Turf.js / WebCodecs — MapLibre covers terrain,
-the route animation is a few lines of geometry, and MediaRecorder is the
-native export path. `ponytail:` if you later want true MP4/H.264 output,
-swap `recorder.ts` for WebCodecs `VideoEncoder` + `mp4-muxer` — the canvas
-capture pipeline stays the same.
+数据源：卫星影像 © Esri World Imagery；地形 DEM © AWS terrarium
+（源自 MapTiler/OpenTopography）；建筑 © OpenFreeMap / OpenMapTiles，数据来自
+OpenStreetMap。全部免 API key。
 
-## Usage
-
-1. Open the app
-2. Drop a `.gpx` file (track segment)
-3. **Play** → camera flies in, route grows, camera follows the head
-4. **Export MP4** → records the animation to `.webm`
-
-Data sources: satellite imagery © Esri World Imagery; terrain DEM ©
-AWS terrarium tiles (MapTiler/OpenTopography-derived). Keep the tab visible
-while exporting — `MediaRecorder` throttles background tabs.
-
-## Development
+## 开发
 
 ```bash
-npm run build      # typecheck + bundle
-node --experimental-strip-types src/gpx.ts   # parser self-check
+npm run build      # 类型检查 + 打包
+node --experimental-strip-types src/gpx.ts   # GPX 解析器自检
+npx tsc --noEmit   # 类型检查
 ```
+
+## 参考
+
+- [3DHikeMap](https://github.com/fredderks/3DHikeMap) —— 原版（R + Leaflet）
+- [MapLibre GL JS](https://maplibre.org/maplibre-gl-js/docs/) —— 地图渲染引擎
 
 ## License
 
