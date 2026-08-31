@@ -4,7 +4,7 @@ import "./style.css";
 import { parseGpx, type Track } from "./gpx";
 import { RouteReveal } from "./animate";
 import { recordWebm } from "./recorder";
-import { RoutePicker } from "./route";
+import { RoutePicker, fetchBrouterRoute } from "./route";
 
 const map = new maplibregl.Map({
   container: "map",
@@ -93,6 +93,16 @@ const speedInput = document.getElementById("speed") as HTMLInputElement;
 const speedVal = document.getElementById("speedval")!;
 const progress = document.getElementById("progress") as HTMLInputElement;
 const pickBtn = document.getElementById("pick") as HTMLButtonElement;
+const presetSel = document.getElementById("preset") as HTMLSelectElement;
+
+// preset routes: name → [origin, destination] (BRouter walking)
+const PRESETS: Record<string, { a: [number, number]; b: [number, number]; name: string }> = {
+  "yongquan-baiyun": {
+    a: [119.3905827, 26.058507], // Yongquan Temple, Gushan
+    b: [119.3761614, 26.0760735], // Baiyun Cave climbing trail
+    name: "Yongquan → Baiyun",
+  },
+};
 
 let reveal: RouteReveal | null = null;
 
@@ -157,6 +167,28 @@ const picker = new RoutePicker(map, setDrop, loadTrackFromData);
 pickBtn.addEventListener("click", () => {
   if (picker.active) picker.reset();
   else picker.begin();
+});
+
+presetSel.addEventListener("change", async () => {
+  const key = presetSel.value;
+  presetSel.selectedIndex = 0; // re-selectable next time
+  if (!key) return;
+  if (key === "moxi") {
+    try {
+      const t = await fetch("demo.gpx").then((r) => r.text());
+      loadTrackFromData(parseGpx(t));
+    } catch {
+      setDrop("Preset load failed");
+    }
+    return;
+  }
+  const p = PRESETS[key];
+  setDrop("Routing preset…");
+  try {
+    loadTrackFromData(await fetchBrouterRoute(p.a, p.b, p.name));
+  } catch (e) {
+    setDrop(`Preset failed: ${(e as Error).message}`);
+  }
 });
 
 drop.addEventListener("click", () => fileInput.click());

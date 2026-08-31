@@ -83,6 +83,15 @@ try:
         loop_on = page.evaluate("window.__reveal.state.loop === true && document.getElementById('loop').getAttribute('aria-pressed') === 'true'")
         page.click("#loop")
         loop_off = page.evaluate("window.__reveal.state.loop === false")
+
+        # --- preset route: select Yongquan → Baiyun ---
+        page.select_option("#preset", "yongquan-baiyun")
+        page.wait_for_function(
+            "window.__reveal && window.__reveal.track.name === 'Yongquan → Baiyun'", timeout=30000)
+        preset_state = page.evaluate("""() => ({
+          pts: window.__reveal.track.points.length,
+          km: window.__reveal.track.distanceKm,
+        })""")
         browser.close()
 
     print("playBtn:", paused)
@@ -91,12 +100,14 @@ try:
     print("pickState:", json.dumps(pick_state))
     print("panel collapsed:", collapsed, "| re-expanded:", expanded)
     print("loop on:", loop_on, "| loop off:", loop_off)
+    print("presetState:", json.dumps(preset_state, ensure_ascii=False))
     print("errors:", errors if errors else "none")
     print("warnings:", warnings[:5] if warnings else "none")
     ok = (state["hasRouteProgress"] and state["hasRouteFull"] and state["routeCoords"] > 0
           and state["t"] and state["t"] > 0 and not errors
           and pick_state["pts"] > 2 and pick_state["km"] > 0 and pick_state["hasRoute"]
-          and collapsed and expanded and loop_on and loop_off)
+          and collapsed and expanded and loop_on and loop_off
+          and preset_state["pts"] > 2 and preset_state["km"] > 1)
     print("E2E PASS" if ok else "E2E FAIL")
     sys.exit(0 if ok else 1)
 finally:

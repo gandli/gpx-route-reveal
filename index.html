@@ -14,6 +14,11 @@
       <summary>GPX Route Reveal</summary>
       <section>
         <h2>Route</h2>
+        <select id="preset" title="Load a preset route">
+          <option value="">Preset routes…</option>
+          <option value="moxi">Moxi Trail (demo.gpx)</option>
+          <option value="yongquan-baiyun">Yongquan Temple → Baiyun Cave (Gushan)</option>
+        </select>
         <div id="drop">Drop .gpx here</div>
         <input id="file" type="file" accept=".gpx" hidden />
         <button id="pick" class="ghost" title="Click the origin, then the destination, on the map">Pick origin &amp; destination</button>
