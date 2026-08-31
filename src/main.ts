@@ -226,6 +226,8 @@ function syncPlayUI() {
   const playing = !!reveal?.state.playing;
   playBtn.disabled = playing;
   pauseBtn.disabled = !playing;
+  loopBtn.classList.toggle("on", !!reveal?.state.loop);
+  loopBtn.setAttribute("aria-pressed", String(!!reveal?.state.loop));
 }
 
 playBtn.addEventListener("click", () => {
