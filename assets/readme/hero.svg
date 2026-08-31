@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" role="img" aria-labelledby="title desc">
+  <title id="title">GPX Route Reveal</title>
+  <desc id="desc">3D satellite route growth along real terrain — drop a GPX, watch the camera follow, export WebM. 100% in-browser.</desc>
+
+  <!-- Background — deep satellite night, single rounded board -->
+  <rect width="1200" height="360" rx="24" fill="#0B0F14"/>
+
+  <!-- Subtle grid (map sheet cue) -->
+  <g opacity="0.08" stroke="#F6F1E8" stroke-width="0.8">
+    <rect x="28" y="18" width="1144" height="324" rx="16" fill="none"/>
+    <path d="M28 140H1172 M28 230H1172 M420 18V342 M720 18V342"/>
+    <!-- corner ticks -->
+    <path d="M28 52V22H58 M1114 22H1144V52 M28 308V342H58 M1114 342H1144V308" fill="none" stroke="#22C55E" stroke-width="1.1" opacity="0.9"/>
+  </g>
+
+  <!-- Left: identity + copy -->
+  <g transform="translate(72 97)">
+    <!-- eyebrow: category + tech lockup -->
+    <g font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10.5" letter-spacing="0.14em">
+      <text x="0" y="0" fill="#94A3B8">3D SATELLITE · MAPLIBRE GL · VITE</text>
+    </g>
+
+    <!-- wordmark -->
+    <text x="0" y="54" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif" font-size="44" font-weight="800" letter-spacing="-0.03em" fill="#F6F1E8">GPX Route Reveal</text>
+    <text x="0" y="82" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif" font-size="14" fill="#CBD5E1">Drop a GPX → watch the route grow along real 3D terrain</text>
+    <text x="0" y="100" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif" font-size="14" fill="#CBD5E1">with the camera following → export as WebM.</text>
+
+    <!-- Motif: dot → dashes → solid route -->
+    <g transform="translate(0 118)">
+      <circle cx="10" cy="8" r="7" fill="#22C55E"/>
+      <circle cx="10" cy="8" r="3" fill="white" opacity="0.95"/>
+      <path d="M22 8 H42" stroke="#22C55E" stroke-width="2.6" stroke-dasharray="7 6" stroke-linecap="round" opacity="0.65"/>
+      <path d="M48 8 H86" stroke="#22C55E" stroke-width="2.6" stroke-dasharray="11 7" stroke-linecap="round" opacity="0.85"/>
+      <path d="M92 8 H168" stroke="#22C55E" stroke-width="3.2" stroke-linecap="round"/>
+      <!-- terminus pulse -->
+      <circle cx="178" cy="8" r="5" fill="none" stroke="#22C55E" stroke-width="1.2" opacity="0.5"/>
+      <circle cx="178" cy="8" r="2.2" fill="#22C55E"/>
+    </g>
+
+    <!-- Metadata row -->
+    <g transform="translate(0 160)" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="10">
+      <text x="0" y="0" fill="#94A3B8">ESRI Satellite · AWS terrarium DEM · OpenFreeMap</text>
+      <text x="0" y="14" fill="#64748B">100% browser · nothing uploaded · </text>
+      <text x="196" y="14" fill="#22C55E">gandli.github.io/gpx-route-reveal</text>
+    </g>
+  </g>
+
+  <!-- Right: proof board — stylized terrain strata + route -->
+  <g transform="translate(760 28)">
+    <rect width="392" height="304" rx="18" fill="#0F1724"/>
+    <rect x="12" y="12" width="368" height="280" rx="14" fill="#111E2E" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+
+    <!-- terrain contour hint (raster-reveal cue) -->
+    <g opacity="0.28" stroke="#94A3B8" stroke-width="0.9" fill="none" stroke-linecap="round">
+      <path d="M24 210 Q90 188 168 196 T340 182"/>
+      <path d="M24 230 Q110 210 196 216 T348 200"/>
+      <path d="M24 248 Q100 232 188 238 T356 222"/>
+      <path d="M24 264 Q96 252 180 258 T360 246"/>
+    </g>
+    <!-- hillshade band -->
+    <rect x="24" y="228" width="344" height="48" rx="10" fill="#0B1220" opacity="0.35"/>
+    <path d="M24 240 Q110 220 196 228 T344 214 L344 276 H24Z" fill="#161F33" opacity="0.45"/>
+
+    <!-- the route — same green, same story as left motif -->
+    <path d="M36 168 C88 158, 112 142, 150 136 S214 122, 252 108 S304 92, 340 76" fill="none" stroke="#22C55E" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- casing -->
+    <path d="M36 168 C88 158, 112 142, 150 136 S214 122, 252 108 S304 92, 340 76" fill="none" stroke="white" stroke-width="1" opacity="0.22" stroke-linecap="round"/>
+    <!-- head -->
+    <circle cx="252" cy="108" r="7.5" fill="#22C55E" stroke="white" stroke-width="2"/>
+    <!-- origin -->
+    <circle cx="36" cy="168" r="5.5" fill="#22C55E" opacity="0.9"/>
+    <circle cx="36" cy="168" r="2.2" fill="white"/>
+
+    <!-- micro legend -->
+    <g font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="8.5" letter-spacing="0.06em">
+      <text x="24" y="50" fill="#94A3B8">MOXI TRAIL · 5.3 KM · 353 PTS</text>
+      <text x="24" y="62" fill="#64748B">GUSHAN · 329–657 M</text>
+    </g>
+
+    <!-- faint camera frustum hint -->
+    <g opacity="0.18" stroke="white" stroke-width="0.8" fill="none">
+      <path d="M252 108 L228 72 L276 72 Z"/>
+      <circle cx="252" cy="72" r="1.4" fill="white" stroke="none" opacity="0.9"/>
+    </g>
+  </g>
+
+  <!-- Bottom hairline — editorial close -->
+  <rect x="72" y="318" width="1056" height="1" rx="0.5" fill="white" opacity="0.07"/>
+</svg>

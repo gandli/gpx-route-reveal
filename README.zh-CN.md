@@ -1,7 +1,7 @@
 # 🗺️ GPX Route Reveal（简体中文）
 
 <p align="center">
-  <img src="assets/readme/route-reveal.jpg" alt="3D 卫星地图路线生长动画" width="100%" />
+  <img src="assets/readme/hero.svg" width="100%" alt="GPX Route Reveal — 3D 卫星地图路线生长动画" />
 </p>
 
 > 拖入 GPX 轨迹 → 3D 卫星地图上路线沿地形生长 + 相机跟随 → 一键导出视频。
