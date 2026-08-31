@@ -218,7 +218,8 @@ export class RouteReveal {
       geometry: routeUpTo(this.track.points, this.cum, t),
     });
     // head marker: small dot at the current head point
-    const { a, f } = sampleAlong(this.track.points, this.cum, Math.min(1, t + CAM.leadBias));
+    // head marker sits exactly at the growth tip (camera keeps leadBias, dot doesn't)
+    const { a, f } = sampleAlong(this.track.points, this.cum, t);
     const [hx, hy] = [
       lerp(this.track.points[a].lon, this.track.points[a + 1].lon, f),
       lerp(this.track.points[a].lat, this.track.points[a + 1].lat, f),
