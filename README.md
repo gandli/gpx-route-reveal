@@ -1,5 +1,9 @@
 # 🗺️ GPX Route Reveal
 
+<p align="center">
+  <img src="assets/readme/route-reveal.jpg" alt="3D satellite route-reveal animation on real terrain" width="100%" />
+</p>
+
 > Drop in a GPX track → watch the route grow along real 3D terrain on a satellite map, with the camera following → export the animation as video.
 > 100% in-browser processing, **nothing is uploaded**.
 
