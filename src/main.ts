@@ -86,6 +86,8 @@ const fileInput = document.getElementById("file") as HTMLInputElement;
 const meta = document.getElementById("meta")!;
 const controls = document.getElementById("controls")!;
 const playBtn = document.getElementById("play") as HTMLButtonElement;
+const pauseBtn = document.getElementById("pause") as HTMLButtonElement;
+const loopBtn = document.getElementById("loop") as HTMLButtonElement;
 const exportBtn = document.getElementById("export") as HTMLButtonElement;
 const speedInput = document.getElementById("speed") as HTMLInputElement;
 const speedVal = document.getElementById("speedval")!;
@@ -116,11 +118,11 @@ function loadTrackFromData(track: Track) {
     reveal.onProgress = (t) => {
       progress.value = String(Math.round(t * 1000));
     };
-    playBtn.textContent = "Play";
     progress.value = "0";
+    syncPlayUI();
     // auto-play so the camera follows the route immediately (demo UX)
     reveal.setPlaying(true);
-    playBtn.textContent = "Pause";
+    syncPlayUI();
   };
   // isStyleLoaded() stays false while tiles stream and 'style.load' never
   // re-fires on an already-parsed style. Gate on the style's base layers
@@ -167,10 +169,28 @@ drop.addEventListener("drop", (e) => {
 });
 fileInput.addEventListener("change", () => fileInput.files?.[0] && loadTrack(fileInput.files[0]));
 
+// play/pause are separate buttons; state lives in reveal, UI synced here
+function syncPlayUI() {
+  const playing = !!reveal?.state.playing;
+  playBtn.disabled = playing;
+  pauseBtn.disabled = !playing;
+}
+
 playBtn.addEventListener("click", () => {
   if (!reveal) return;
-  reveal.setPlaying(!reveal.state.playing);
-  playBtn.textContent = reveal.state.playing ? "Pause" : "Play";
+  reveal.setPlaying(true);
+  syncPlayUI();
+});
+pauseBtn.addEventListener("click", () => {
+  if (!reveal) return;
+  reveal.setPlaying(false);
+  syncPlayUI();
+});
+loopBtn.addEventListener("click", () => {
+  if (!reveal) return;
+  reveal.state.loop = !reveal.state.loop;
+  loopBtn.classList.toggle("on", reveal.state.loop);
+  loopBtn.setAttribute("aria-pressed", String(reveal.state.loop));
 });
 speedInput.addEventListener("input", () => {
   if (!reveal) return;
@@ -199,7 +219,8 @@ exportBtn.addEventListener("click", async () => {
     setDrop(`Export failed: ${(e as Error).message}`);
   } finally {
     exportBtn.disabled = false;
-    exportBtn.textContent = "Export MP4";
+    exportBtn.textContent = "⬇ Export";
+    syncPlayUI();
   }
 });
 

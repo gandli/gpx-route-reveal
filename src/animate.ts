@@ -7,6 +7,7 @@ export interface RevealState {
   t: number; // 0..1
   playing: boolean;
   speed: number;
+  loop: boolean;
 }
 
 const CAM = {
@@ -105,7 +106,7 @@ export class RouteReveal {
   map: MapLibreMap;
   track: Track;
   cum: Float64Array;
-  state: RevealState = { t: 0, playing: false, speed: 1 };
+  state: RevealState = { t: 0, playing: false, speed: 1, loop: false };
   routeLayer = "route-progress";
   onProgress: ((t: number) => void) | null = null;
   private raf = 0;
@@ -181,7 +182,12 @@ export class RouteReveal {
     const dt = (now - this.last) / 1000;
     this.last = now;
     this.state.t = Math.min(1, this.state.t + (dt * this.state.speed) / 45); // ~45s per route at 1×
-    if (this.state.t >= 1) this.setPlaying(false);
+    if (this.state.t >= 1) {
+      if (this.state.loop) {
+        this.state.t = 0;
+        this.sm = null; // re-seed camera at the start instead of gliding back
+      } else this.setPlaying(false);
+    }
     this.render();
     if (this.state.playing) this.raf = requestAnimationFrame(this.tick);
   };
