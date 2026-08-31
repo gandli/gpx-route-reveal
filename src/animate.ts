@@ -93,7 +93,7 @@ function interpAt(points: TrackPoint[], cum: Float64Array, t: number): [number, 
   return [lerp(p.lon, n.lon, f), lerp(p.lat, n.lat, f)];
 }
 
-// Camera state at normalized distance t. Returns { center, zoom, pitch, bearing }.
+// Camera state at raw progress t (0..1). center == head dot: always centered.
 export function cameraAt(
   points: TrackPoint[],
   cum: Float64Array,
@@ -101,13 +101,12 @@ export function cameraAt(
 ): { center: [number, number]; zoom: number; pitch: number; bearing: number } {
   const [hx, hy] = interpAt(points, cum, t);
   const [cx, cy] = interpAt(points, cum, Math.min(1, t + CAM.leadBias));
-  // chord bearing over the lead window — stable across dense polylines;
-  // center stays on head(t) so the upcoming segment is visible from behind,
-  // not from a look-ahead point that may be on the far side of a ridge.
+  // chord bearing over the lead window — stable across dense polylines
   const bearing = ((Math.atan2(cx - hx, cy - hy) * 180) / Math.PI + 360) % 360;
-
-  const zoom = lerp(CAM.minZoom, CAM.maxZoom, 0.5 + 0.5 * Math.sin(Math.PI * t));
-  const pitch = lerp(30, CAM.pitch, 0.5 + 0.5 * Math.sin(Math.PI * t));
+  // zoom/pitch ease at the endpoints (pull-in/out); center tracks raw t
+  const te = easeEndpoint(t);
+  const zoom = lerp(CAM.minZoom, CAM.maxZoom, 0.5 + 0.5 * Math.sin(Math.PI * te));
+  const pitch = lerp(30, CAM.pitch, 0.5 + 0.5 * Math.sin(Math.PI * te));
   return { center: [hx, hy], zoom, pitch, bearing };
 }
 
@@ -209,18 +208,17 @@ export class RouteReveal {
 
   render(dt?: number) {
     const t = this.state.t;
-    const target = cameraAt(this.track.points, this.cum, easeEndpoint(t));
-    // low-pass smoothing: glide toward the target instead of snapping.
-    // dt=undefined (scrub) → snap exactly; else exponential time-constant filter.
+    const target = cameraAt(this.track.points, this.cum, t);
+    // center: snap exactly so the head dot stays in the viewport center;
+    // bearing/pitch/zoom glide (scrub → snap, playback → time-constant filter).
     if (!this.sm || dt === undefined) this.sm = { ...target };
     else {
       const s = this.sm;
+      s.center[0] = target.center[0];
+      s.center[1] = target.center[1];
       const a = 1 - Math.exp(-dt / CAM.tauCenter);
-      s.center[0] = lerp(s.center[0], target.center[0], a);
-      s.center[1] = lerp(s.center[1], target.center[1], a);
       s.zoom = lerp(s.zoom, target.zoom, a);
       s.pitch = lerp(s.pitch, target.pitch, a);
-      // bearing: slower filter + shortest way around the wrap
       const ab = 1 - Math.exp(-dt / CAM.tauBearing);
       let db = ((target.bearing - s.bearing + 540) % 360) - 180;
       s.bearing = (s.bearing + db * ab + 360) % 360;
