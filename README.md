@@ -19,11 +19,11 @@ Vite + TypeScript + MapLibre GL 纯前端实现，无构建期服务器、无重
 **磨溪登山道**（福州鼓山，5.3 km，329–657 m 海拔）—— 真实 OSM 路网轨迹，
 相机沿路线平滑跟随，路线从起点沿 3D 地形生长：
 
-<video controls width="100%" src="assets/readme/route-reveal-demo.mp4"></video>
+<video controls width="100%" src="https://github.com/gandli/gpx-route-reveal/releases/download/demo-media/route-reveal3.mp4"></video>
 
 *(MP4，21 秒，2.3× 加速。若无法播放视频，见下方 GIF 版本。)*
 
-![route-reveal-demo](assets/readme/route-reveal-demo.gif)
+![route-reveal-demo](https://github.com/gandli/gpx-route-reveal/releases/download/demo-media/route-reveal3.gif)
 
 ## 静态截图
 
