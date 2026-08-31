@@ -57,7 +57,7 @@ const map = new maplibregl.Map({
       },
     ],
     // real 3D terrain mesh — without this the map is flat; pitch is only an angle
-    terrain: { source: "terrain", exaggeration: 1.5 },
+    terrain: { source: "terrain", exaggeration: 2.5 },
   },
   center: [119.305, 26.082],
   zoom: 12,
