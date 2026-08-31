@@ -233,7 +233,6 @@ function syncPlayUI() {
   const playing = !!reveal?.state.playing;
   playBtn.disabled = playing;
   pauseBtn.disabled = !playing;
-  loopBtn.classList.toggle("on", !!reveal?.state.loop);
   loopBtn.setAttribute("aria-pressed", String(!!reveal?.state.loop));
 }
 
@@ -250,8 +249,7 @@ pauseBtn.addEventListener("click", () => {
 loopBtn.addEventListener("click", () => {
   if (!reveal) return;
   reveal.state.loop = !reveal.state.loop;
-  loopBtn.classList.toggle("on", reveal.state.loop);
-  loopBtn.setAttribute("aria-pressed", String(reveal.state.loop));
+  syncPlayUI();
 });
 speedInput.addEventListener("input", () => {
   if (!reveal) return;
