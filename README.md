@@ -8,6 +8,8 @@
 [![vite](https://img.shields.io/badge/Vite-6-646CFF)](https://vitejs.dev/)
 [![build](https://img.shields.io/github/actions/workflow/status/gandli/gpx-route-reveal/ci.yml?branch=main)](https://github.com/gandli/gpx-route-reveal/actions)
 
+[![live](https://img.shields.io/badge/Live_Demo-gandli.github.io%2Fgpx--route--reveal-2EA043)](https://gandli.github.io/gpx-route-reveal/)
+
 English | [简体中文](README.zh-CN.md)
 
 A 3D satellite route-reveal animation tool — a modern rewrite of
@@ -66,6 +68,8 @@ export path.
 `VideoEncoder` + `mp4-muxer`; the canvas capture pipeline stays unchanged.
 
 ## Quick Start
+
+**[Try it live →](https://gandli.github.io/gpx-route-reveal/)** — no install needed. Or run locally:
 
 ```bash
 npm install

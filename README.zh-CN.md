@@ -8,6 +8,8 @@
 [![vite](https://img.shields.io/badge/Vite-6-646CFF)](https://vitejs.dev/)
 [![build](https://img.shields.io/github/actions/workflow/status/gandli/gpx-route-reveal/ci.yml?branch=main)](https://github.com/gandli/gpx-route-reveal/actions)
 
+[![live](https://img.shields.io/badge/Live_Demo-gandli.github.io%2Fgpx--route--reveal-2EA043)](https://gandli.github.io/gpx-route-reveal/)
+
 [English](README.md) | 简体中文
 
 3D 卫星地图路线生长动画工具 —— 现代重写旧
@@ -63,6 +65,8 @@ Vite + TypeScript + MapLibre GL 纯前端实现，无构建期服务器、无重
 WebCodecs `VideoEncoder` + `mp4-muxer`，canvas 采集管线不变。
 
 ## 快速开始
+
+**[在线体验 →](https://gandli.github.io/gpx-route-reveal/)** —— 免安装。本地运行：
 
 ```bash
 npm install
