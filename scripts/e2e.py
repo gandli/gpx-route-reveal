@@ -44,6 +44,14 @@ try:
             hasRouteProgress: !!m.getLayer('route-progress'),
             hasRouteFull: !!m.getLayer('route-full'),
             routeCoords: (m.querySourceFeatures('route-progress')[0]?.geometry?.coordinates?.length) || 0,
+            // head dot must sit at the growth tip: last progress coord == head coord
+            headSync: (() => {
+              const line = m.querySourceFeatures('route-progress')[0]?.geometry?.coordinates;
+              const head = m.querySourceFeatures('head')[0]?.geometry?.coordinates;
+              return !!line?.length && !!head &&
+                Math.abs(line[line.length - 1][0] - head[0]) < 1e-6 &&
+                Math.abs(line[line.length - 1][1] - head[1]) < 1e-6;
+            })(),
             t: r ? r.state.t : null,
             zoom: m.getZoom(), bearing: m.getBearing(), pitch: m.getPitch(),
           };
@@ -112,6 +120,7 @@ try:
     print("errors:", errors if errors else "none")
     print("warnings:", warnings[:5] if warnings else "none")
     ok = (state["hasRouteProgress"] and state["hasRouteFull"] and state["routeCoords"] > 0
+          and state["headSync"]
           and state["t"] and state["t"] > 0 and not errors
           and pick_state["pts"] > 2 and pick_state["km"] > 0 and pick_state["hasRoute"]
           and collapsed and expanded and loop_on and loop_off and loop_cleared
