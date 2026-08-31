@@ -70,17 +70,26 @@ try:
           };
         }""")
         page.screenshot(path=str(root / "e2e-shot-pick.png"))
+
+        # --- collapsible panel: <details> native, collapse hides controls ---
+        page.click("#panel summary")
+        collapsed = page.locator("#panel:not([open])").count() == 1 and not page.is_visible("#controls")
+        page.screenshot(path=str(root / "e2e-shot-collapsed.png"))
+        page.click("#panel summary")
+        expanded = page.is_visible("#controls")
         browser.close()
 
     print("playBtn:", paused)
     print("state:", json.dumps(state))
     print("pickHint1:", hint1, "| pickHint2:", hint2)
     print("pickState:", json.dumps(pick_state))
+    print("panel collapsed:", collapsed, "| re-expanded:", expanded)
     print("errors:", errors if errors else "none")
     print("warnings:", warnings[:5] if warnings else "none")
     ok = (state["hasRouteProgress"] and state["hasRouteFull"] and state["routeCoords"] > 0
           and state["t"] and state["t"] > 0 and not errors
-          and pick_state["pts"] > 2 and pick_state["km"] > 0 and pick_state["hasRoute"])
+          and pick_state["pts"] > 2 and pick_state["km"] > 0 and pick_state["hasRoute"]
+          and collapsed and expanded)
     print("E2E PASS" if ok else "E2E FAIL")
     sys.exit(0 if ok else 1)
 finally:
