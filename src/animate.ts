@@ -10,14 +10,15 @@ export interface RevealState {
 }
 
 const CAM = {
-  height: 9, // above track point (km)
-  zoom: 13.6,
-  pitch: 55,
-  minZoom: 12,
-  maxZoom: 14.2,
+  height: 9, // above track point (km) — unused, kept for reference
+  zoom: 14.5,
+  pitch: 65,
+  minZoom: 13.5,
+  maxZoom: 15.5,
   fov: 45,
   // lead/bias -> camera looks ahead of the head so the route "grows" below it.
   leadBias: 0.08,
+  smooth: 0.18, // low-pass filter factor (0-1); lower = smoother/slower following
 };
 
 function lerp(a: number, b: number, t: number): number {
@@ -112,6 +113,7 @@ export class RouteReveal {
   private canvas: HTMLCanvasElement | null = null;
   private ctx: CanvasRenderingContext2D | null = null;
   private hidden: boolean = false;
+  private sm: { center: [number, number]; zoom: number; pitch: number; bearing: number } | null = null;
 
   constructor(map: MapLibreMap, track: Track) {
     this.map = map;
@@ -186,10 +188,23 @@ export class RouteReveal {
 
   render() {
     const t = this.state.t;
-    const { center, zoom, pitch, bearing } = cameraAt(this.track.points, this.cum, easeEndpoint(t));
+    const target = cameraAt(this.track.points, this.cum, easeEndpoint(t));
+    // low-pass smoothing: glide toward the target instead of snapping.
+    // first frame seeds from target to avoid a big jump at t=0.
+    if (!this.sm) this.sm = { ...target };
+    else {
+      const s = this.sm;
+      s.center[0] = lerp(s.center[0], target.center[0], CAM.smooth);
+      s.center[1] = lerp(s.center[1], target.center[1], CAM.smooth);
+      s.zoom = lerp(s.zoom, target.zoom, CAM.smooth);
+      s.pitch = lerp(s.pitch, target.pitch, CAM.smooth);
+      // bearing wraps at 360 — lerp the shortest way around
+      let db = ((target.bearing - s.bearing + 540) % 360) - 180;
+      s.bearing = (s.bearing + db * CAM.smooth + 360) % 360;
+    }
     // don't fight the user while dragging/paused
     if (!this.map.isMoving()) {
-      this.map.jumpTo({ center, zoom, pitch, bearing });
+      this.map.jumpTo({ center: this.sm.center, zoom: this.sm.zoom, pitch: this.sm.pitch, bearing: this.sm.bearing });
     }
     (this.map.getSource("route-progress") as GeoJSONSource).setData({
       type: "Feature",
