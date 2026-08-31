@@ -31,8 +31,9 @@ try:
 
         page.set_input_files("#file", str(root / "public" / "demo.gpx"))
         page.wait_for_selector("#meta:not([hidden])", timeout=10000)
-
-        page.click("#play")
+        # auto-load + this drop both queue a build; let them settle, then play
+        page.wait_for_timeout(1500)
+        page.evaluate("window.__reveal.setPlaying(true)")
         page.wait_for_timeout(3000)
         paused = page.locator("#play").text_content()
 
@@ -48,14 +49,38 @@ try:
           };
         }""")
         page.screenshot(path=str(root / "e2e-shot.png"))
+
+        # --- pick-route flow: click Pick, then two map points → BRouter route ---
+        page.evaluate("window.__reveal && window.__reveal.setPlaying(false)")
+        page.click("#pick")
+        hint1 = page.locator("#drop").text_content()
+        page.mouse.click(800, 400)  # start
+        page.wait_for_timeout(200)
+        hint2 = page.locator("#drop").text_content()
+        page.mouse.click(400, 500)  # end
+        page.wait_for_function(
+            "window.__reveal && window.__reveal.track.name === 'Picked route'", timeout=30000)
+        pick_state = page.evaluate("""() => {
+          const m = window.__map, r = window.__reveal;
+          return {
+            pts: r.track.points.length,
+            km: r.track.distanceKm,
+            hasRoute: !!m.getLayer('route-progress'),
+            pickLayer: !!m.getLayer('pick-a'),
+          };
+        }""")
+        page.screenshot(path=str(root / "e2e-shot-pick.png"))
         browser.close()
 
     print("playBtn:", paused)
     print("state:", json.dumps(state))
+    print("pickHint1:", hint1, "| pickHint2:", hint2)
+    print("pickState:", json.dumps(pick_state))
     print("errors:", errors if errors else "none")
     print("warnings:", warnings[:5] if warnings else "none")
     ok = (state["hasRouteProgress"] and state["hasRouteFull"] and state["routeCoords"] > 0
-          and state["t"] and state["t"] > 0 and not errors)
+          and state["t"] and state["t"] > 0 and not errors
+          and pick_state["pts"] > 2 and pick_state["km"] > 0 and pick_state["hasRoute"])
     print("E2E PASS" if ok else "E2E FAIL")
     sys.exit(0 if ok else 1)
 finally:

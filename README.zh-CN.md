@@ -43,6 +43,7 @@ Vite + TypeScript + MapLibre GL 纯前端实现，无构建期服务器、无重
 ## 核心特性
 
 - **拖放即用** —— 打开页面自动加载磨溪登山道 demo，手机也能看（无需拖文件）
+- **地图选点生成路线** —— 点击起点、终点，经 BRouter（OSM 步道网络，免 key）生成步行路线并同管线播放动画
 - **路线生长** —— 截断 `LineString` 沿累积距离驱动，绿色路线从起点沿地形生长
 - **相机平滑跟随** —— 低通滤波全部相机参数，镜头沿轨迹缓动转向，无抖动
 - **真实 3D 地形** —— AWS terrarium DEM 高程网格，2.5× 夸张增强立体感
@@ -57,6 +58,7 @@ Vite + TypeScript + MapLibre GL 纯前端实现，无构建期服务器、无重
 | 地图 / 3D | MapLibre GL 4（raster DEM + terrain + fill-extrusion） |
 | 路线动画 | 截断 GeoJSON `LineString` + 累积距离采样 |
 | 相机 | `jumpTo` + 低通滤波插值 |
+| 路线规划 | BRouter Web API（OSM `shortest` profile，GeoJSON 输出，免 key） |
 | 导出 | `MediaRecorder` over canvas stream → WebM |
 
 刻意不引入 Three.js / Turf.js / WebCodecs —— MapLibre 已覆盖地形，
@@ -77,7 +79,7 @@ npm run dev
 ## 使用
 
 1. 打开应用（或局域网访问 `http://<你的IP>:5173`）
-2. 拖入 `.gpx` 轨迹文件
+2. 拖入 `.gpx` 轨迹文件 —— 或点 **Pick route**，在地图上点起点、终点
 3. **Play** → 相机飞入、路线沿地形生长、相机跟随路线头
 4. **Export** → 录制当前动画为 `.webm`（保持标签页可见）
 

@@ -45,6 +45,7 @@ building height (low buildings pale gray → high buildings warm brown).*
 ## Features
 
 - **Drag & drop** — a demo track (Moxi Trail) loads automatically on open; drop any `.gpx` to replace it
+- **Pick a route on the map** — click start, then end: a walking route is generated via BRouter (OSM path network, key-free) and animated the same way
 - **Route growth** — a truncated `LineString` driven by cumulative distance; the green trail grows from the start along the terrain
 - **Smooth camera follow** — low-pass filter on all camera parameters; the lens eases along the track with no jitter
 - **Real 3D terrain** — AWS terrarium DEM elevation grid, 2.5× exaggeration for depth
@@ -59,6 +60,7 @@ building height (low buildings pale gray → high buildings warm brown).*
 | Map / 3D | MapLibre GL 4 (raster DEM + terrain + fill-extrusion) |
 | Route animation | Truncated GeoJSON `LineString` + cumulative-distance sampling |
 | Camera | `jumpTo` + low-pass-filtered interpolation |
+| Routing | BRouter Web API (OSM `shortest` profile, GeoJSON out, key-free) |
 | Export | `MediaRecorder` over canvas stream → WebM |
 
 Deliberately no Three.js / Turf.js / WebCodecs — MapLibre already covers terrain,
@@ -80,7 +82,7 @@ npm run dev
 ## Usage
 
 1. Open the app (or visit it on your LAN at `http://<your-ip>:5173`)
-2. Drop in a `.gpx` track file
+2. Drop in a `.gpx` track file — or hit **Pick route** and click a start and end point on the map
 3. **Play** → the camera flies in, the route grows along the terrain, the camera follows the route head
 4. **Export** → records the current animation as `.webm` (keep the tab visible)
 

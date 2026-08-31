@@ -265,6 +265,12 @@ export class RouteReveal {
   destroy() {
     cancelAnimationFrame(this.raf);
     this.setPlaying(false);
+    // remove layers/sources so a new RouteReveal can be built on the same map
+    // (pick-route creates one per route) without duplicate-ID crashes.
+    for (const id of ["route-full", "route-progress", "head"]) {
+      if (this.map.getLayer(id)) this.map.removeLayer(id);
+      if (this.map.getSource(id)) this.map.removeSource(id);
+    }
   }
 }
 
