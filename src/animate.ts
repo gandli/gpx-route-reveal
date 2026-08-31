@@ -165,6 +165,11 @@ export class RouteReveal {
   setPlaying(p: boolean) {
     this.state.playing = p;
     if (p) {
+      // replay: pressing Play at the end restarts from the beginning
+      if (this.state.t >= 1) {
+        this.state.t = 0;
+        this.sm = null; // re-seed camera at the start instead of gliding back
+      }
       this.last = performance.now();
       this.raf = requestAnimationFrame(this.tick);
     } else {

@@ -95,6 +95,13 @@ try:
         loop_off = page.evaluate("window.__reveal.state.loop === false")
         loop_bg_off = page.evaluate("getComputedStyle(document.getElementById('loop')).backgroundColor")
 
+        # --- replay: pause (syncs UI), seek to end, press Play → t restarts from 0 ---
+        page.click("#pause")
+        page.evaluate("window.__reveal.setT(1)")
+        page.click("#play")
+        page.wait_for_function("window.__reveal.state.t > 0 && window.__reveal.state.t < 0.5", timeout=5000)
+        replay_ok = page.evaluate("window.__reveal.state.playing === true")
+
         # --- loop ON then load a new route: fresh reveal (loop=false) must clear the button ---
         page.click("#loop")
         page.select_option("#preset", "wushan-yushan")
@@ -136,7 +143,7 @@ try:
           and state["headSync"]
           and state["t"] and state["t"] > 0 and not errors
           and pick_state["pts"] > 2 and pick_state["km"] > 0 and pick_state["hasRoute"]
-          and collapsed and expanded and loop_on and loop_off and loop_cleared
+          and collapsed and expanded and loop_on and loop_off and loop_cleared and replay_ok
           and loop_bg_on != loop_bg_off and loop_bg_off == "rgba(0, 0, 0, 0)"
           and preset_state["pts"] > 2 and preset_state["km"] > 1
           and fudao_state["pts"] > 300 and fudao_state["km"] > 8)
