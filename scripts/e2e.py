@@ -108,6 +108,15 @@ try:
           pts: window.__reveal.track.points.length,
           km: window.__reveal.track.distanceKm,
         })""")
+
+        # --- fudao full trail: multi-waypoint preset must route through all stops ---
+        page.select_option("#preset", "fudao-full")
+        page.wait_for_function(
+            "window.__reveal && window.__reveal.track.name === 'Fudao Full Trail'", timeout=30000)
+        fudao_state = page.evaluate("""() => ({
+          pts: window.__reveal.track.points.length,
+          km: window.__reveal.track.distanceKm,
+        })""")
         browser.close()
 
     print("playBtn:", paused)
@@ -116,7 +125,8 @@ try:
     print("pickState:", json.dumps(pick_state))
     print("panel collapsed:", collapsed, "| re-expanded:", expanded)
     print("loop on:", loop_on, "| loop off:", loop_off, "| loop cleared on reload:", loop_cleared)
-    print("presetState:", json.dumps(preset_state, ensure_ascii=False))
+    print("presetState:", json.dumps(preset_state, ensure_ascii=False),
+          "fudaoFull:", json.dumps(fudao_state, ensure_ascii=False))
     print("errors:", errors if errors else "none")
     print("warnings:", warnings[:5] if warnings else "none")
     ok = (state["hasRouteProgress"] and state["hasRouteFull"] and state["routeCoords"] > 0
@@ -124,7 +134,8 @@ try:
           and state["t"] and state["t"] > 0 and not errors
           and pick_state["pts"] > 2 and pick_state["km"] > 0 and pick_state["hasRoute"]
           and collapsed and expanded and loop_on and loop_off and loop_cleared
-          and preset_state["pts"] > 2 and preset_state["km"] > 1)
+          and preset_state["pts"] > 2 and preset_state["km"] > 1
+          and fudao_state["pts"] > 300 and fudao_state["km"] > 8)
     print("E2E PASS" if ok else "E2E FAIL")
     sys.exit(0 if ok else 1)
 finally:

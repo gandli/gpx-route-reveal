@@ -95,31 +95,38 @@ const progress = document.getElementById("progress") as HTMLInputElement;
 const pickBtn = document.getElementById("pick") as HTMLButtonElement;
 const presetSel = document.getElementById("preset") as HTMLSelectElement;
 
-// preset routes: name → [origin, destination] (BRouter walking)
-const PRESETS: Record<string, { a: [number, number]; b: [number, number]; name: string }> = {
+// preset routes: waypoints → BRouter walking route (A→B, or a multi-point trail)
+const PRESETS: Record<string, { waypoints: [number, number][]; name: string }> = {
   "yongquan-baiyun": {
-    a: [119.3905827, 26.058507], // Yongquan Temple, Gushan
-    b: [119.3761614, 26.0760735], // Baiyun Cave climbing trail
+    waypoints: [[119.3905827, 26.058507], [119.3761614, 26.0760735]],
     name: "Yongquan → Baiyun",
   },
   "fudao-jinniushan": {
-    a: [119.2487938, 26.0848005], // Fudao trailhead, Hongshan
-    b: [119.2596272, 26.0880239], // Jinniushan park
+    waypoints: [[119.2487938, 26.0848005], [119.2596272, 26.0880239]],
     name: "Fudao → Jinniushan",
   },
+  "fudao-full": {
+    waypoints: [
+      [119.2487938, 26.0848005],  // Fudao trailhead, Hongshan
+      [119.256591, 26.081026],    // Jinniushan park
+      [119.2596272, 26.0880239],  // back up the skywalk
+      [119.2615119, 26.090036],   // 福道 footway
+      [119.2663221, 26.0940545],  // Meifeng Mountain park
+      [119.2752913, 26.0964445],  // 福道 footway
+      [119.2770275, 26.0997199],  // Zuohai park west gate
+    ],
+    name: "Fudao Full Trail",
+  },
   "sanfang-yantai": {
-    a: [119.2919836, 26.0850946], // Three Lanes and Seven Alleys
-    b: [119.3108953, 26.0481449], // Yantai Hill park
+    waypoints: [[119.2919836, 26.0850946], [119.3108953, 26.0481449]],
     name: "Sanfang → Yantai",
   },
   "wushan-yushan": {
-    a: [119.2896128, 26.0780444], // Wushan (Black Pagoda)
-    b: [119.3033916, 26.0813406], // Yushan (White Pagoda)
+    waypoints: [[119.2896128, 26.0780444], [119.3033916, 26.0813406]],
     name: "Wushan → Yushan",
   },
   "shangxiahang-yantai": {
-    a: [119.3030957, 26.0559454], // Shangxiahang historic streets
-    b: [119.3108953, 26.0481449], // Yantai Hill park
+    waypoints: [[119.3030957, 26.0559454], [119.3108953, 26.0481449]],
     name: "Shangxiahang → Yantai",
   },
 };
@@ -205,7 +212,7 @@ presetSel.addEventListener("change", async () => {
   const p = PRESETS[key];
   setDrop("Routing preset…");
   try {
-    loadTrackFromData(await fetchBrouterRoute(p.a, p.b, p.name));
+    loadTrackFromData(await fetchBrouterRoute(p.waypoints, p.name));
   } catch (e) {
     setDrop(`Preset failed: ${(e as Error).message}`);
   }
