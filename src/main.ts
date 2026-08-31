@@ -17,6 +17,12 @@ const map = new maplibregl.Map({
         attribution: "© Esri — Source: Esri, Maxar, Earthstar Geographics",
         maxzoom: 19,
       },
+      // OSM vector tiles (OpenMapTiles schema) — building footprints + heights
+      // for 3D extrusion. Versioned planet path from tiles.openfreemap.org/planet.
+      buildings: {
+        type: "vector",
+        url: "https://tiles.openfreemap.org/planet",
+      },
       terrain: {
         type: "raster-dem",
         tiles: ["https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png"],
@@ -35,6 +41,20 @@ const map = new maplibregl.Map({
     layers: [
       { id: "satellite", type: "raster", source: "satellite" },
       { id: "terrain", type: "hillshade", source: "terrainShade", paint: { "hillshade-exaggeration": 1 } },
+      // 3D buildings on top of the satellite imagery — fill-extrusion with OSM heights
+      {
+        id: "building-3d",
+        type: "fill-extrusion",
+        source: "buildings",
+        "source-layer": "building",
+        minzoom: 14,
+        paint: {
+          "fill-extrusion-base": ["get", "render_min_height"],
+          "fill-extrusion-color": "hsl(35, 8%, 85%)",
+          "fill-extrusion-height": ["get", "render_height"],
+          "fill-extrusion-opacity": 0.85,
+        },
+      },
     ],
     // real 3D terrain mesh — without this the map is flat; pitch is only an angle
     terrain: { source: "terrain", exaggeration: 1.5 },
