@@ -35,6 +35,8 @@ try:
         page.wait_for_timeout(1500)
         page.evaluate("window.__reveal.setPlaying(true)")
         page.wait_for_timeout(3000)
+        # sample mid-travel (t past the 0.12 hold) so dotCentered isn't trivially true
+        page.wait_for_function("window.__reveal.state.t > 0.3", timeout=30000)
         paused = page.locator("#play").is_disabled()  # playing → Play disabled, Pause enabled
 
         state = page.evaluate("""() => {
@@ -44,15 +46,28 @@ try:
             hasRouteProgress: !!m.getLayer('route-progress'),
             hasRouteFull: !!m.getLayer('route-full'),
             routeCoords: (m.querySourceFeatures('route-progress')[0]?.geometry?.coordinates?.length) || 0,
-            // head dot must sit at the growth tip: last progress coord == head coord
+            // head dot must sit at the growth tip: head == an endpoint of some
+            // progress tile feature (querySourceFeatures clips across tiles)
             headSync: (() => {
-              const line = m.querySourceFeatures('route-progress')[0]?.geometry?.coordinates;
+              const feats = m.querySourceFeatures('route-progress');
               const head = m.querySourceFeatures('head')[0]?.geometry?.coordinates;
-              return !!line?.length && !!head &&
-                Math.abs(line[line.length - 1][0] - head[0]) < 1e-6 &&
-                Math.abs(line[line.length - 1][1] - head[1]) < 1e-6;
+              if (!head) return false;
+              return feats.some((f) => {
+                const c = f.geometry?.coordinates;
+                if (!c?.length) return false;
+                const e = [c[0], c[c.length - 1]];
+                return e.some(([x, y]) => Math.abs(x - head[0]) < 1e-6 && Math.abs(y - head[1]) < 1e-6);
+              });
             })(),
             t: r ? r.state.t : null,
+            // head dot must sit at viewport center (camera locked to head)
+            dotCentered: (() => {
+              const head = m.querySourceFeatures('head')[0]?.geometry?.coordinates;
+              if (!head) return false;
+              const p = m.project(head);
+              const c = m.getContainer().getBoundingClientRect();
+              return Math.abs(p.x - c.width / 2) < 40 && Math.abs(p.y - c.height / 2) < 40;
+            })(),
             zoom: m.getZoom(), bearing: m.getBearing(), pitch: m.getPitch(),
           };
         }""")
@@ -140,7 +155,7 @@ try:
     print("errors:", errors if errors else "none")
     print("warnings:", warnings[:5] if warnings else "none")
     ok = (state["hasRouteProgress"] and state["hasRouteFull"] and state["routeCoords"] > 0
-          and state["headSync"]
+          and state["headSync"] and state["dotCentered"]
           and state["t"] and state["t"] > 0 and not errors
           and pick_state["pts"] > 2 and pick_state["km"] > 0 and pick_state["hasRoute"]
           and collapsed and expanded and loop_on and loop_off and loop_cleared and replay_ok
