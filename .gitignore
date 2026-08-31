@@ -4,3 +4,5 @@ dist/
 .DS_Store
 # e2e debug screenshots (regenerated every run, never referenced)
 e2e-shot*.png
+# occlusion debug screenshots
+occl-*.png
