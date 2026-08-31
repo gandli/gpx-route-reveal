@@ -12,7 +12,9 @@
     "maplibre-gl": "^4.7.1"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
     "@types/geojson": "^7946.0.14",
+    "tailwindcss": "^4.3.3",
     "typescript": "^5.5.4",
     "vite": "^6.4.3"
   }

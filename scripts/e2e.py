@@ -101,7 +101,7 @@ try:
         page.wait_for_function(
             "window.__reveal && window.__reveal.track.name === 'Wushan → Yushan'", timeout=30000)
         loop_cleared = page.evaluate(
-            "!window.__reveal.state.loop && !document.getElementById('loop').classList.contains('on')")
+            "!window.__reveal.state.loop && document.getElementById('loop').getAttribute('aria-pressed') !== 'true'")
 
         # --- preset route: select Yongquan → Baiyun ---
         page.select_option("#preset", "yongquan-baiyun")
