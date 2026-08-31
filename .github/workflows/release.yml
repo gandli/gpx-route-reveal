@@ -1,0 +1,36 @@
+name: release
+on:
+  push:
+    tags:
+      - '*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Build changelog from conventional commits
+        run: |
+          PREV=$(git describe --tags --abbrev=0 --match '[0-9]*.[0-9]*.[0-9]*' "${GITHUB_REF_NAME}^" 2>/dev/null || true)
+          RANGE="${PREV:+$PREV..HEAD}"
+          LOG=$(git log $RANGE --no-merges --pretty=format:'- %s (%h)')
+          {
+            echo "## ${GITHUB_REF_NAME} ($(date -u +%Y-%m-%d))"
+            for pair in "feat:Features" "fix:Bug Fixes" "perf:Performance" "refactor:Refactoring" "docs:Documentation" "chore|test|ci|build:Chores"; do
+              pat="${pair%%:*}"; sec="${pair##*:}"
+              lines=$(echo "$LOG" | grep -iE "^- ($pat)[(!:]")
+              [ -n "$lines" ] && printf '\n### %s\n%s\n' "$sec" "$lines"
+            done
+            other=$(echo "$LOG" | grep -ivE '^- (feat|fix|perf|refactor|docs|chore|test|ci|build)[(!:]')
+            [ -n "$other" ] && printf '\n### Other\n%s\n' "$other"
+          } > RELEASE_NOTES.md
+          cat RELEASE_NOTES.md
+      - name: Create release
+        run: gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes-file RELEASE_NOTES.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
