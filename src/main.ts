@@ -50,9 +50,18 @@ const map = new maplibregl.Map({
         minzoom: 14,
         paint: {
           "fill-extrusion-base": ["get", "render_min_height"],
-          "fill-extrusion-color": "hsl(35, 8%, 85%)",
+          "fill-extrusion-color": [
+            "interpolate",
+            ["linear"],
+            ["get", "render_height"],
+            2, "hsl(35, 12%, 82%)",   // low buildings — pale
+            8, "hsl(35, 14%, 74%)",   // 2-3 floors
+            15, "hsl(30, 18%, 66%)",  // mid-rise
+            25, "hsl(25, 22%, 58%)",  // taller — warmer/darker
+            40, "hsl(20, 26%, 50%)",  // high-rise
+          ],
           "fill-extrusion-height": ["get", "render_height"],
-          "fill-extrusion-opacity": 0.85,
+          "fill-extrusion-opacity": 0.9,
         },
       },
     ],
