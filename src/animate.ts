@@ -11,15 +11,17 @@ export interface RevealState {
 }
 
 const CAM = {
-  height: 9, // above track point (km) — unused, kept for reference
   zoom: 14.5,
   pitch: 65,
   minZoom: 13.5,
   maxZoom: 15.5,
   fov: 45,
-  // lead/bias -> camera looks ahead of the head so the route "grows" below it.
+  // lead/bias -> camera looks ahead of the head so the route "grows" below it;
+  // also the chord window for bearing (crosses hairpin segments, no per-segment shake)
   leadBias: 0.08,
-  smooth: 0.18, // low-pass filter factor (0-1); lower = smoother/slower following
+  // time constants (s) for the exponential low-pass; frame-rate independent
+  tauCenter: 0.3,
+  tauBearing: 0.6,
 };
 
 function lerp(a: number, b: number, t: number): number {
@@ -83,18 +85,24 @@ export function routeUpTo(points: TrackPoint[], cum: Float64Array, t: number): G
   return { type: "LineString", coordinates: coords };
 }
 
+// Interpolated position at normalized distance t.
+function interpAt(points: TrackPoint[], cum: Float64Array, t: number): [number, number] {
+  const { a, f } = sampleAlong(points, cum, t);
+  const p = points[a];
+  const n = points[a + 1];
+  return [lerp(p.lon, n.lon, f), lerp(p.lat, n.lat, f)];
+}
+
 // Camera state at normalized distance t. Returns { center, zoom, pitch, bearing }.
 export function cameraAt(
   points: TrackPoint[],
   cum: Float64Array,
   t: number,
 ): { center: [number, number]; zoom: number; pitch: number; bearing: number } {
-  const { a, f } = sampleAlong(points, cum, Math.min(1, t + CAM.leadBias));
-  const p = points[a];
-  const n = points[a + 1];
-  const cx = lerp(p.lon, n.lon, f);
-  const cy = lerp(p.lat, n.lat, f);
-  const bearing = ((Math.atan2(n.lon - cx, n.lat - cy) * 180) / Math.PI + 360) % 360;
+  const [hx, hy] = interpAt(points, cum, t);
+  const [cx, cy] = interpAt(points, cum, Math.min(1, t + CAM.leadBias));
+  // chord bearing over the lead window — stable across dense polylines
+  const bearing = ((Math.atan2(cx - hx, cy - hy) * 180) / Math.PI + 360) % 360;
 
   const zoom = lerp(CAM.minZoom, CAM.maxZoom, 0.5 + 0.5 * Math.sin(Math.PI * t));
   const pitch = lerp(30, CAM.pitch, 0.5 + 0.5 * Math.sin(Math.PI * t));
@@ -193,25 +201,27 @@ export class RouteReveal {
         this.sm = null; // re-seed camera at the start instead of gliding back
       } else this.setPlaying(false);
     }
-    this.render();
+    this.render(dt); // dt from rAF tick → time-constant smoothing
     if (this.state.playing) this.raf = requestAnimationFrame(this.tick);
   };
 
-  render() {
+  render(dt?: number) {
     const t = this.state.t;
     const target = cameraAt(this.track.points, this.cum, easeEndpoint(t));
     // low-pass smoothing: glide toward the target instead of snapping.
-    // first frame seeds from target to avoid a big jump at t=0.
-    if (!this.sm) this.sm = { ...target };
+    // dt=undefined (scrub) → snap exactly; else exponential time-constant filter.
+    if (!this.sm || dt === undefined) this.sm = { ...target };
     else {
       const s = this.sm;
-      s.center[0] = lerp(s.center[0], target.center[0], CAM.smooth);
-      s.center[1] = lerp(s.center[1], target.center[1], CAM.smooth);
-      s.zoom = lerp(s.zoom, target.zoom, CAM.smooth);
-      s.pitch = lerp(s.pitch, target.pitch, CAM.smooth);
-      // bearing wraps at 360 — lerp the shortest way around
+      const a = 1 - Math.exp(-dt / CAM.tauCenter);
+      s.center[0] = lerp(s.center[0], target.center[0], a);
+      s.center[1] = lerp(s.center[1], target.center[1], a);
+      s.zoom = lerp(s.zoom, target.zoom, a);
+      s.pitch = lerp(s.pitch, target.pitch, a);
+      // bearing: slower filter + shortest way around the wrap
+      const ab = 1 - Math.exp(-dt / CAM.tauBearing);
       let db = ((target.bearing - s.bearing + 540) % 360) - 180;
-      s.bearing = (s.bearing + db * CAM.smooth + 360) % 360;
+      s.bearing = (s.bearing + db * ab + 360) % 360;
     }
     // don't fight the user while dragging/paused
     if (!this.map.isMoving()) {
