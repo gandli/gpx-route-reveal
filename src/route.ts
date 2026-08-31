@@ -7,10 +7,11 @@ const BROUTER = "https://brouter.de/brouter";
 
 type LngLat = [number, number];
 
-// BRouter walking route between two points → Track (also used by presets)
-export async function fetchBrouterRoute(a: LngLat, b: LngLat, name: string): Promise<Track> {
+// BRouter walking route through waypoints → Track (also used by presets).
+// 2 points = A→B; more points chain via "|" so a preset can follow a long trail.
+export async function fetchBrouterRoute(waypoints: LngLat[], name: string): Promise<Track> {
   const url =
-    `${BROUTER}?lonlats=${a[0]},${a[1]}|${b[0]},${b[1]}` +
+    `${BROUTER}?lonlats=${waypoints.map((p) => `${p[0]},${p[1]}`).join("|")}` +
     `&profile=shortest&alternativeidx=0&format=geojson`;
   const r = await fetch(url);
   if (!r.ok) throw new Error(`BRouter HTTP ${r.status}`);
@@ -107,7 +108,7 @@ export class RoutePicker {
 
   private async fetchRoute(a: LngLat, b: LngLat) {
     try {
-      const track = await fetchBrouterRoute(a, b, "Picked route");
+      const track = await fetchBrouterRoute([a, b], "Picked route");
       this.picking = false;
       this.map.getCanvas().style.cursor = "";
       this.onStatus(`Route: ${track.distanceKm.toFixed(1)} km, ${track.points.length} pts — click Pick again to redraw`);
