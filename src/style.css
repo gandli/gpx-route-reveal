@@ -25,7 +25,26 @@ body { font-family: system-ui, -apple-system, sans-serif; }
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
   backdrop-filter: blur(6px);
 }
-#panel h1 { font-size: 18px; margin: 0 0 4px; color: var(--ink); }
+#panel summary {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+  cursor: pointer;
+  list-style: none; /* own chevron */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+}
+#panel summary::-webkit-details-marker { display: none; }
+#panel summary::after {
+  content: "▾";
+  margin-left: auto;
+  color: var(--muted);
+  transition: transform 0.15s;
+}
+#panel:not([open]) summary::after { transform: rotate(-90deg); }
+#panel:not([open]) { padding-bottom: 12px; }
 #panel .sub { font-size: 13px; color: var(--muted); margin: 0 0 12px; line-height: 1.4; }
 #drop {
   border: 2px dashed #cbd5e1;

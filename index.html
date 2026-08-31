@@ -10,8 +10,8 @@
 <body>
   <div id="app">
     <div id="map"></div>
-    <div id="panel">
-      <h1>GPX Route Reveal</h1>
+    <details id="panel" open>
+      <summary>GPX Route Reveal</summary>
       <p class="sub">Drop a GPX track → 3D satellite route-reveal animation. Processed entirely in your browser.</p>
       <div id="drop">Drop .gpx here</div>
       <input id="file" type="file" accept=".gpx" hidden />
@@ -28,7 +28,7 @@
         <label for="progress">progress</label>
       </div>
       <p class="hint">Data: © Esri World Imagery · terrain © MapTiler/OpenTopography · routing © BRouter/OpenStreetMap · no key required.</p>
-    </div>
+    </details>
   </div>
   <script type="module" src="/src/main.ts"></script>
 </body>
