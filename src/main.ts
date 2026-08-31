@@ -102,6 +102,26 @@ const PRESETS: Record<string, { a: [number, number]; b: [number, number]; name: 
     b: [119.3761614, 26.0760735], // Baiyun Cave climbing trail
     name: "Yongquan → Baiyun",
   },
+  "fudao-jinniushan": {
+    a: [119.2487938, 26.0848005], // Fudao trailhead, Hongshan
+    b: [119.2596272, 26.0880239], // Jinniushan park
+    name: "Fudao → Jinniushan",
+  },
+  "sanfang-yantai": {
+    a: [119.2919836, 26.0850946], // Three Lanes and Seven Alleys
+    b: [119.3108953, 26.0481449], // Yantai Hill park
+    name: "Sanfang → Yantai",
+  },
+  "wushan-yushan": {
+    a: [119.2896128, 26.0780444], // Wushan (Black Pagoda)
+    b: [119.3033916, 26.0813406], // Yushan (White Pagoda)
+    name: "Wushan → Yushan",
+  },
+  "shangxiahang-yantai": {
+    a: [119.3030957, 26.0559454], // Shangxiahang historic streets
+    b: [119.3108953, 26.0481449], // Yantai Hill park
+    name: "Shangxiahang → Yantai",
+  },
 };
 
 let reveal: RouteReveal | null = null;
