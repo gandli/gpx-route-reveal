@@ -22,6 +22,8 @@ export async function recordWebm(map: MapLibreMap, reveal: RouteReveal, onTick: 
   });
 
   reveal.setCanvasHidden(true);
+  const wasLoop = reveal.state.loop; // loop would reset t before the recorder sees 1
+  reveal.state.loop = false;
   rec.start(100);
   reveal.setPlaying(true);
   const start = performance.now();
@@ -31,6 +33,7 @@ export async function recordWebm(map: MapLibreMap, reveal: RouteReveal, onTick: 
   }
   await new Promise((r) => setTimeout(r, 500)); // let the tail settle
   reveal.setPlaying(false);
+  reveal.state.loop = wasLoop;
   rec.stop();
   reveal.setCanvasHidden(false);
   const blob = await done;
