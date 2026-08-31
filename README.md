@@ -10,7 +10,7 @@
 [![stack](https://img.shields.io/badge/MapLibre%20GL-4.x-396CB2)](https://maplibre.org/)
 [![ts](https://img.shields.io/badge/TypeScript-strict-3178C6)](https://www.typescriptlang.org/)
 [![vite](https://img.shields.io/badge/Vite-6-646CFF)](https://vitejs.dev/)
-[![build](https://img.shields.io/github/actions/workflow/status/gandli/gpx-route-reveal/ci.yml?branch=main)](https://github.com/gandli/gpx-route-reveal/actions)
+[![build](https://img.shields.io/github/actions/workflow/status/gandli/gpx-route-reveal/deploy.yml?branch=main)](https://github.com/gandli/gpx-route-reveal/actions)
 
 [![live](https://img.shields.io/badge/Live_Demo-gandli.github.io%2Fgpx--route--reveal-2EA043)](https://gandli.github.io/gpx-route-reveal/)
 
