@@ -12,7 +12,7 @@ export interface RevealState {
 
 const CAM = {
   zoom: 14.5,
-  pitch: 65,
+  pitch: 45,
   minZoom: 13.5,
   maxZoom: 15.5,
   fov: 45,
@@ -101,12 +101,14 @@ export function cameraAt(
 ): { center: [number, number]; zoom: number; pitch: number; bearing: number } {
   const [hx, hy] = interpAt(points, cum, t);
   const [cx, cy] = interpAt(points, cum, Math.min(1, t + CAM.leadBias));
-  // chord bearing over the lead window — stable across dense polylines
+  // chord bearing over the lead window — stable across dense polylines;
+  // center stays on head(t) so the upcoming segment is visible from behind,
+  // not from a look-ahead point that may be on the far side of a ridge.
   const bearing = ((Math.atan2(cx - hx, cy - hy) * 180) / Math.PI + 360) % 360;
 
   const zoom = lerp(CAM.minZoom, CAM.maxZoom, 0.5 + 0.5 * Math.sin(Math.PI * t));
   const pitch = lerp(30, CAM.pitch, 0.5 + 0.5 * Math.sin(Math.PI * t));
-  return { center: [cx, cy], zoom, pitch, bearing };
+  return { center: [hx, hy], zoom, pitch, bearing };
 }
 
 // ---- Animator: owns the map, canvas sync, and the reveal loop. ----
