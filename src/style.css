@@ -55,6 +55,16 @@ body { font-family: system-ui, -apple-system, sans-serif; }
   color: var(--muted);
   margin: 0 0 6px;
 }
+#preset {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--ink);
+  background: #fff;
+  margin-bottom: 8px;
+}
 #drop {
   border: 2px dashed #cbd5e1;
   border-radius: 10px;

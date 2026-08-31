@@ -7,6 +7,33 @@ const BROUTER = "https://brouter.de/brouter";
 
 type LngLat = [number, number];
 
+// BRouter walking route between two points → Track (also used by presets)
+export async function fetchBrouterRoute(a: LngLat, b: LngLat, name: string): Promise<Track> {
+  const url =
+    `${BROUTER}?lonlats=${a[0]},${a[1]}|${b[0]},${b[1]}` +
+    `&profile=shortest&alternativeidx=0&format=geojson`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`BRouter HTTP ${r.status}`);
+  const data = await r.json();
+  // coords are [lon, lat, ele(m)] — ele present in this profile
+  const coords: [number, number, number][] = data.features?.[0]?.geometry?.coordinates ?? [];
+  if (coords.length < 2) throw new Error("no route found between the two points");
+  const km = parseFloat(data.features[0].properties["track-length"]) / 1000 || 0;
+  const points: TrackPoint[] = coords.map((c) => ({
+    lon: c[0],
+    lat: c[1],
+    ele: Number.isFinite(c[2]) ? c[2] : null,
+  }));
+  const eles = points.map((p) => p.ele).filter((e): e is number => e !== null);
+  return {
+    name,
+    points,
+    distanceKm: km,
+    minEle: eles.length ? Math.min(...eles) : null,
+    maxEle: eles.length ? Math.max(...eles) : null,
+  };
+}
+
 export class RoutePicker {
   private pts: LngLat[] = [];
   private picking = false;
@@ -79,33 +106,11 @@ export class RoutePicker {
   }
 
   private async fetchRoute(a: LngLat, b: LngLat) {
-    const url =
-      `${BROUTER}?lonlats=${a[0]},${a[1]}|${b[0]},${b[1]}` +
-      `&profile=shortest&alternativeidx=0&format=geojson`;
     try {
-      const r = await fetch(url);
-      if (!r.ok) throw new Error(`BRouter HTTP ${r.status}`);
-      const data = await r.json();
-      // coords are [lon, lat, ele(m)] — ele present in this profile
-      const coords: [number, number, number][] = data.features?.[0]?.geometry?.coordinates ?? [];
-      if (coords.length < 2) throw new Error("no route found between the two points");
-      const km = parseFloat(data.features[0].properties["track-length"]) / 1000 || 0;
-      const points: TrackPoint[] = coords.map((c) => ({
-        lon: c[0],
-        lat: c[1],
-        ele: Number.isFinite(c[2]) ? c[2] : null,
-      }));
-      const eles = points.map((p) => p.ele).filter((e): e is number => e !== null);
-      const track: Track = {
-        name: "Picked route",
-        points,
-        distanceKm: km,
-        minEle: eles.length ? Math.min(...eles) : null,
-        maxEle: eles.length ? Math.max(...eles) : null,
-      };
+      const track = await fetchBrouterRoute(a, b, "Picked route");
       this.picking = false;
       this.map.getCanvas().style.cursor = "";
-      this.onStatus(`Route: ${km.toFixed(1)} km, ${points.length} pts — click Pick again to redraw`);
+      this.onStatus(`Route: ${track.distanceKm.toFixed(1)} km, ${track.points.length} pts — click Pick again to redraw`);
       this.onTrack(track);
     } catch (e) {
       this.onStatus(`Route failed: ${(e as Error).message} — click Pick to retry`);
