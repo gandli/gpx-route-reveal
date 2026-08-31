@@ -84,6 +84,14 @@ try:
         page.click("#loop")
         loop_off = page.evaluate("window.__reveal.state.loop === false")
 
+        # --- loop ON then load a new route: fresh reveal (loop=false) must clear the button ---
+        page.click("#loop")
+        page.select_option("#preset", "wushan-yushan")
+        page.wait_for_function(
+            "window.__reveal && window.__reveal.track.name === 'Wushan → Yushan'", timeout=30000)
+        loop_cleared = page.evaluate(
+            "!window.__reveal.state.loop && !document.getElementById('loop').classList.contains('on')")
+
         # --- preset route: select Yongquan → Baiyun ---
         page.select_option("#preset", "yongquan-baiyun")
         page.wait_for_function(
@@ -99,14 +107,14 @@ try:
     print("pickHint1:", hint1, "| pickHint2:", hint2)
     print("pickState:", json.dumps(pick_state))
     print("panel collapsed:", collapsed, "| re-expanded:", expanded)
-    print("loop on:", loop_on, "| loop off:", loop_off)
+    print("loop on:", loop_on, "| loop off:", loop_off, "| loop cleared on reload:", loop_cleared)
     print("presetState:", json.dumps(preset_state, ensure_ascii=False))
     print("errors:", errors if errors else "none")
     print("warnings:", warnings[:5] if warnings else "none")
     ok = (state["hasRouteProgress"] and state["hasRouteFull"] and state["routeCoords"] > 0
           and state["t"] and state["t"] > 0 and not errors
           and pick_state["pts"] > 2 and pick_state["km"] > 0 and pick_state["hasRoute"]
-          and collapsed and expanded and loop_on and loop_off
+          and collapsed and expanded and loop_on and loop_off and loop_cleared
           and preset_state["pts"] > 2 and preset_state["km"] > 1)
     print("E2E PASS" if ok else "E2E FAIL")
     sys.exit(0 if ok else 1)
